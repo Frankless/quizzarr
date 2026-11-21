@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr-BE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Quizzarr</title>
+  <meta name="description" content="Choisir quoi regarder ce soir, en cinq questions.">
+  <meta name="theme-color" content="#111315">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon-180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Quizzarr">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" class="fill"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.05-4.95L19 9M19 4.5V9h-4.5"/></symbol>
+  </svg>
+
+  <div class="app">
+    <header class="top">
+      <button class="icon-btn" id="back" type="button" aria-label="Retour" hidden><svg><use href="#i-back"/></svg></button>
+      <span class="brand" id="brand">Quizzarr</span>
+      <div class="progress" id="progress" hidden aria-hidden="true"></div>
+      <button class="icon-btn" id="open-settings" type="button" aria-label="Réglages"><svg><use href="#i-settings"/></svg></button>
+    </header>
+
+    <div class="notice" id="notice" hidden></div>
+
+    <main>
+      <!-- Home -->
+      <section class="view home" id="view-home">
+        <p class="eyebrow">Il est</p>
+        <p class="clock" id="home-clock">--</p>
+        <p class="lead" id="home-count">Chargement de la bibliothèque…</p>
+        <button class="btn primary big" id="start" type="button" disabled>C'est parti</button>
+        <p class="small muted" id="home-hint">Cinq questions au plus, deux réponses à chaque fois.</p>
+      </section>
+
+      <!-- Question -->
+      <section class="view question" id="view-question" hidden>
+        <p class="eyebrow" id="q-step"></p>
+        <h1 class="q-text" id="q-text"></h1>
+        <div class="choices">
+          <button class="choice" id="choice-a" type="button"><span class="choice-label"></span><span class="choice-hint"></span></button>
+          <button class="choice" id="choice-b" type="button"><span class="choice-label"></span><span class="choice-hint"></span></button>
+        </div>
+        <p class="small muted" id="q-left"></p>
+      </section>
+
+      <!-- Results -->
+      <section class="view results" id="view-results" hidden>
+        <div class="results-head">
+          <h1 id="r-title">Ce soir, on pourrait regarder…</h1>
+          <p class="small muted" id="r-sub"></p>
+        </div>
+        <div class="cards" id="cards"></div>
+        <div class="empty" id="r-empty" hidden>
+          <p class="lead">Plus rien à proposer avec ces réponses.</p>
+        </div>
+        <div class="results-foot">
+          <button class="btn" id="restart" type="button"><svg><use href="#i-redo"/></svg>Recommencer</button>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="view settings" id="view-settings" hidden>
+        <h1>Réglages</h1>
+
+        <div class="panel">
+          <h2>Connexions · Jellyfin</h2>
+          <form id="jf-form" autocomplete="off">
+            <label class="field">Adresse du serveur
+              <input id="jf-url" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="http://192.168.2.239:8096">
+            </label>
+            <label class="field">Clé API
+              <input id="jf-key" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Coller la clé API">
+              <span class="small muted" id="jf-key-state"></span>
+            </label>
+            <p class="small muted">Dans Jellyfin : Tableau de bord → Clés API → +. La clé reste sur le NAS, elle n'est jamais renvoyée à l'iPhone.</p>
+            <div class="row">
+              <button class="btn" id="jf-test" type="button">Tester la connexion</button>
+              <button class="btn primary" id="jf-save" type="submit">Enregistrer</button>
+            </div>
+            <p class="msg" id="jf-msg" role="status" hidden></p>
+          </form>
+        </div>
+
+        <div class="panel" id="panel-user" hidden>
+          <h2>Utilisateur de référence</h2>
+          <p class="small muted">Ses « vu / pas vu » servent au quiz. Choisis le tien.</p>
+          <label class="field">Utilisateur
+            <select id="jf-user"><option value="">Choisir…</option></select>
+          </label>
+        </div>
+
+        <div class="panel" id="panel-libs" hidden>
+          <h2>Bibliothèques</h2>
+          <p class="small muted">Films et séries proposés dans le quiz. Les bibliothèques des enfants sont décochées par défaut.</p>
+          <div class="checks" id="libs"></div>
+        </div>
+
+        <p class="msg" id="settings-error" hidden></p>
+
+        <div class="panel">
+          <h2>Catalogue</h2>
+          <p id="cat-state" class="small muted"></p>
+          <button class="btn" id="refresh" type="button"><svg><use href="#i-redo"/></svg>Actualiser</button>
+          <p class="msg" id="refresh-msg" role="status" hidden></p>
+        </div>
+
+        <div class="panel about">
+          <p class="small muted">Quizzarr <span id="version"></span> · accessible à tout le réseau de la maison, sans mot de passe. À ne jamais ouvrir sur Internet.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
