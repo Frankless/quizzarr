@@ -1,0 +1,13 @@
+# Quizzarr — projet Docker UGOS (Docker > Projet > Créer).
+# L'adresse et la clé API de Jellyfin se saisissent ensuite dans l'app : Réglages > Connexions.
+services:
+  quizzarr:
+    image: ghcr.io/frankless/quizzarr:latest
+    container_name: quizzarr
+    restart: unless-stopped
+    ports:
+      - "7980:7980"
+    environment:
+      TZ: Europe/Brussels
+    volumes:
+      - /volume3/docker/quizzarr:/config
