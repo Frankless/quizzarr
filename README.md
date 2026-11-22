@@ -93,7 +93,7 @@ Chaque modification sur `main` publie une nouvelle image `ghcr.io/frankless/quiz
 
 Prises pendant que François n'était pas là ; toutes modifiables.
 
-1. **Dépôt** : la session de développement n'avait pas le droit de créer `Frankless/quizzarr`. Le code est livré dans le dossier `quizzarr/` du dépôt `Frankless/Test-The-World` (branche `claude/quizzarr-v1-0jev4b`), prêt à être poussé tel quel dans un nouveau dépôt `Frankless/quizzarr` (voir « Publier le dépôt » plus bas). Le workflow GitHub Actions ne se déclenche qu'une fois à la racine du nouveau dépôt.
+1. **Dépôt** : `Frankless/quizzarr`, branche `main`. Le code a d'abord été écrit dans un dossier du dépôt `Test-The-World` (la session de développement ne pouvait pas créer de dépôt), puis poussé ici avec son historique.
 2. **Stack reprise de Calendarr** (lu en lecture seule) : Python 3.12, FastAPI, httpx, interface HTML/CSS/JS sans framework ni étape de build, `/config` rendu à l'utilisateur 1000:1000 au démarrage puis abandon des droits root, même structure de `connections.json` (droits 600), même schéma de publication GitHub Actions (multi-architecture amd64/arm64).
 3. **Publication** : contrairement à Calendarr (image `edge` sur `main`, `latest` aux versions), Quizzarr publie **`latest` à chaque push sur `main`**, comme demandé, plus une étiquette `sha-…` pour revenir en arrière. Les tests doivent passer avant la publication. Le paquet GHCR est privé par défaut à sa première publication : le passer en **public** dans GitHub → Packages → quizzarr → Package settings → Change visibility.
 4. **Lien Lire** : format `…/web/index.html#!/details?id=…` comme demandé. Calendarr utilise `…/web/#/details?id=…` (format des Jellyfin récents) ; les deux fonctionnent normalement. Si le lien n'ouvre que l'accueil de Jellyfin, c'est une ligne à changer dans `app/cards.py`.
@@ -131,10 +131,6 @@ deploy/           compose.yaml pour UGOS
 Lancer les tests : `pip install -r requirements-dev.txt && python -m pytest`.
 Essayer en local sans NAS : `CONFIG_DIR=./config uvicorn app.main:app --port 7980`, puis `python -m tests.fake_jellyfin 8097` pour un faux Jellyfin (adresse `http://127.0.0.1:8097`, clé `test-key`).
 
-## Publier le dépôt
+## Après la première publication
 
-À faire une fois, par François :
-
-1. Sur GitHub, créer le dépôt **`Frankless/quizzarr`** (public, sans README).
-2. Copier le contenu du dossier `quizzarr/` à la racine de ce nouveau dépôt (y compris le dossier caché `.github`), puis pousser sur `main`.
-3. Attendre la fin de l'action « Image Docker » (onglet Actions), puis rendre le paquet public (décision 3).
+Le paquet `ghcr.io/frankless/quizzarr` est privé par défaut : GitHub → profil → Packages → quizzarr → Package settings → Change visibility → Public. Sans ça, UGOS ne peut pas télécharger l'image.
